@@ -1,33 +1,31 @@
-
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torch import optim
-import numpy as np
 import simplejson as json
 
-class CNN(nn.Module):
 
+class CNN(nn.Module):
     """
     It appears to be good practice to leave the last layer of the linear layers raw.
     Then to use nn.CrossEntropyLoss() which combines nn.LogSoftmax() and nn.NLLLoss().
     If probabilities are needed then you can nn.functional.softmax() the output of the NN.
     """
+
     def __init__(self):
         super().__init__()
         self.conv = nn.Sequential(
             # input = 1x28x28
-            nn.Conv2d(in_channels=1, out_channels=5, kernel_size=3, stride=1), # 10x26x26
+            nn.Conv2d(in_channels=1, out_channels=5, kernel_size=3, stride=1),  # 10x26x26
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2), # 10x13x13
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 10x13x13
         )
 
         self.lin_1 = nn.Linear(in_features=784, out_features=20)
         self.lin_2 = nn.Linear(in_features=20, out_features=15)
         self.lin_3 = nn.Linear(in_features=15, out_features=10)
         self.lin_4 = nn.Linear(in_features=10, out_features=10)
-
 
     def forward(self, x):
         x1 = self.conv(x)
@@ -38,8 +36,6 @@ class CNN(nn.Module):
         x6 = self.lin_4(x5)
 
         return x6
-
-
 
 
 # Define a transform to normalize the data
@@ -130,6 +126,7 @@ with torch.no_grad():
                           'value': num.item()
                           })
 
+
 def validation(model, testloader, criterion):
     """
     Compute the accuracy and test loss.
@@ -141,11 +138,8 @@ def validation(model, testloader, criterion):
     accuracy = 0
 
     for images, labels in testloader:
-
         output = model(images)
         test_loss += criterion(output, labels).item()
-
-
 
         probs = F.softmax(output, dim=1)
         checker = probs.max(dim=1)
@@ -156,6 +150,7 @@ def validation(model, testloader, criterion):
     test_loss = test_loss / len(testloader)
 
     return test_loss, accuracy
+
 
 epochs = 2
 print_every = 100
@@ -199,23 +194,17 @@ for e in range(epochs):
             net.eval()
 
             with torch.no_grad():
-
-
                 test_loss, test_accuracy = validation(net, testloader, criterion)
-            print("Epoch: {}/{}\n".format(e+1, epochs),
-                  "Training Loss:      {:.3f}...".format(running_loss/print_every),
+            print("Epoch: {}/{}\n".format(e + 1, epochs),
+                  "Training Loss:      {:.3f}...".format(running_loss / print_every),
                   "Test Loss:      {:.3f}\n".format(test_loss),
-                  "Training Accuracy:  {:.3f}...".format(train_accuracy/print_every),
+                  "Training Accuracy:  {:.3f}...".format(train_accuracy / print_every),
                   "Test Accuracy:  {:.3f}".format(test_accuracy)
                   )
             running_loss = 0
             train_accuracy = 0
 with torch.no_grad():
-
-    # links = []
     p1, _ = net.lin_2.parameters()
-    # p1 -= p1.min()
-    # p1 /= p1.max()
     p1 = torch.abs(p1)
     p1 *= 100
     for target, item in enumerate(p1):
@@ -226,8 +215,6 @@ with torch.no_grad():
                           })
 
     p2, _ = net.lin_3.parameters()
-    # p2 -= p2.min()
-    # p2 /= p2.max()
     p2 = torch.abs(p2)
     p2 *= 100
     for target, item in enumerate(p2):
@@ -238,8 +225,6 @@ with torch.no_grad():
                           })
 
     p3, _ = net.lin_4.parameters()
-    # p3 -= p3.min()
-    # p3 /= p3.max()
     p3 = torch.abs(p3)
     p3 *= 100
     for target, item in enumerate(p3):

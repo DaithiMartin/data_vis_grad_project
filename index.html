@@ -7,22 +7,25 @@
 <body>
 <div style="width: 1000px">
     <h4>
-        Bellow is a network visualization for a convolutional NN trained on the Fashion MNIST data set.
+        Bellow is a network visualization for a convolutional Neural Network (CNN) trained on the Fashion MNIST data set.
+        The Fashion MNIST data set is a collection 28x28 pixel grayscale images of 10 clothing items.
         The graph in the lower left represents the network before any training. The graph on the right represents the
-        network after 200 passes over the training data. The NN is comprised of one convolutional layer and 4 fully
-        connected layers. Only the fully connected layers are displayed. The node colors indicates the layer and the line
-        opacity indicates the absolute value of the weight. High opacity indicates a larger value and lower opacity
-        indicates a lower value.
+        network after integrating through the training data 200 times. The CNN is comprised of one convolutional
+        layer and 4 fully connected layers. Only the fully connected layers are displayed.
     </h4>
     <h4>
-        Here we example the effects of L1 regularization. L1 regularization add the l1 norm of the network weights to
-        the cost function. Since the network attempts to minimize the cost function, the network should favor smaller
-        weights as the training process progresses.
+        The node colors indicates the layer and the line opacity indicates the absolute value of the weight.
+        High opacity indicates a larger value and lower opacity indicates a lower value.
+    </h4>
+    <h4>
+        Here we examine the effects of L1 regularization. L1 regularization adds the L1 norm of the network weights to
+        the cost function. Since the network attempts to minimize the cost function, and does so by adjusting the network
+        weights, the network should favor smaller weights as the training process progresses.
     </h4>
     <h4>
         Hypothesis: L1 regularization will favor smaller weights as training progresses.
     </h4>
-    <h5>Data Source: Daithi Martin, Fashion MNIST, NN_data.json in repository</h5>
+    <h5>Data Source: https://github.com/DaithiMartin/data_vis_grad_project/blob/master/NN_data.json</h5>
 </div>
 <canvas id="network" width="2000" height="1000"></canvas>
 <canvas id="untrained_network" width="1000" height="800"></canvas>
@@ -35,7 +38,6 @@
         width = canvas.attr("width"),
         height = canvas.attr("height"),
         r = 10,
-        // color = d3.schemeTableau(),
         color = d3.scaleOrdinal().domain([0, 4]).range(['#0656f3', '#fd7f03', '#9e5bc7', '#fd030b']),
         ctx = canvas.node().getContext("2d"),
         xpos = d3.scaleOrdinal().range([0, width]),
@@ -52,7 +54,6 @@
                 return -(d.layer * 400);
             }))
         .force("link", d3.forceLink()
-            // .strength() // here is where you could add strength based on some object attribute
             .id(function (d) {
                 return d.id;
             }));
@@ -63,7 +64,6 @@
         simulation
             .nodes(graph.nodes)
             .on("tick", update)
-
             .force("link")
             .links(graph.links);
 
@@ -75,41 +75,18 @@
                 .on("drag", dragged)
                 .on("end", dragended));
 
-
         function update() {
             ctx.clearRect(0, 0, width, height);
 
-            // ctx.beginPath();
             ctx.globalAlpha = 0.5;
-            // ctx.strokeStyle = "#aaa";
             graph.links.forEach(drawLink);
-            // ctx.stroke();
-
 
             ctx.globalAlpha = 1.0;
             graph.nodes.forEach(drawNode);
 
-            // puts labels on nodes
-            // graph.nodes.forEach(drawLabel);
-
-        }
-
-        function dragsubject() {
-            return simulation.find(d3.event.x, d3.event.y);
-        }
-
-        function mouseover() {
-            return simulation.find(d3.event.x, d3.event.y);
         }
 
     })
-
-    function drawLabel(d) {
-        ctx.font = "bold 14px Helvetica, Arial, sans-serif";
-        ctx.fillStyle = "#000000";
-        ctx.fillText(d.id, d.x, d.y);
-
-    }
 
     function drawNode(d) {
         ctx.beginPath();
@@ -117,8 +94,6 @@
         ctx.moveTo(d.x, d.y);
         ctx.arc(d.x, d.y, r, 0, 2 * Math.PI);
         ctx.fill();
-
-
     }
 
     function drawLink(l) {
@@ -129,27 +104,6 @@
         ctx.stroke();
     }
 
-    function dragstarted() {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        d3.event.subject.fx = d3.event.subject.x;
-        d3.event.subject.fy = d3.event.subject.y;
-        console.log(d3.event.subject);
-    }
-
-    function dragged() {
-        d3.event.subject.fx = d3.event.x;
-        d3.event.subject.fy = d3.event.y;
-    }
-
-    function dragended() {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        d3.event.subject.fx = null;
-        d3.event.subject.fy = null;
-    }
-
-
 </script>
-
-
 </body>
 </html>
