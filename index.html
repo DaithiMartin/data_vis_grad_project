@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Project 4</title>
+    <title>Graduate Project</title>
 </head>
 <body>
 <div style="width: 1000px">
@@ -13,8 +13,9 @@
         connected layers. Only the fully connected layers are displayed. The node colors indicates the layer and the line
         opacity indicates the absolute value of the weight. High opacity indicates a larger value and lower opacity
         indicates a lower value.
-
-        Here we example the effects of L! regularization. L1 regularization add the l1 norm of the network weights to
+    </h4>
+    <h4>
+        Here we example the effects of L1 regularization. L1 regularization add the l1 norm of the network weights to
         the cost function. Since the network attempts to minimize the cost function, the network should favor smaller
         weights as the training process progresses.
     </h4>
@@ -41,14 +42,14 @@
         ypos = d3.scaleOrdinal().range([0, height]),
         linkColor = d3.scaleLinear().domain([0, 100]).range(['#fcfdfb', '#030000'])
     simulation = d3.forceSimulation()
-        .force("x", d3.forceX(width / 4))
+        .force("x", d3.forceX(width / 3.5))
         .force("y", d3.forceY(function (d) {
-            return height/2 + (d.graph * 20)
+            return height/2 + (d.graph * 16)
         }))
         .force("collide", d3.forceCollide(r + 1))
         .force("charge", d3.forceManyBody()
             .strength(function (d) {
-                return -(d.layer * 400);
+                return -(d.layer * 500);
             }))
         .force("link", d3.forceLink()
             // .strength() // here is where you could add strength based on some object attribute
@@ -89,7 +90,7 @@
             graph.nodes.forEach(drawNode);
 
             // puts labels on nodes
-            graph.nodes.forEach(drawLabel);
+            // graph.nodes.forEach(drawLabel);
 
         }
 
