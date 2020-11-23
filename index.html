@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project 4</title>
+</head>
+<body>
+<div style="width: 1000px">
+    <h4>
+        Bellow is a network visualization for a convolutional NN trained on the Fashion MNIST data set.
+        The graph in the lower left represents the network before any training. The graph on the right represents the
+        network after 200 passes over the training data. The NN is comprised of one convolutional layer and 4 fully
+        connected layers. Only the fully connected layers are displayed. The node colors indicates the layer and the line
+        opacity indicates the absolute value of the weight. High opacity indicates a larger value and lower opacity
+        indicates a lower value.
+
+        Here we example the effects of L! regularization. L1 regularization add the l1 norm of the network weights to
+        the cost function. Since the network attempts to minimize the cost function, the network should favor smaller
+        weights as the training process progresses.
+    </h4>
+    <h4>
+        Hypothesis: L1 regularization will favor smaller weights as training progresses.
+    </h4>
+    <h5>Data Source: Daithi Martin, Fashion MNIST, NN_data.json in repository</h5>
+</div>
+<canvas id="network" width="2000" height="1000"></canvas>
+<canvas id="untrained_network" width="1000" height="800"></canvas>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<script>
+
+    var canvas = d3.select("#network"),
+        width = canvas.attr("width"),
+        height = canvas.attr("height"),
+        r = 10,
+        // color = d3.schemeTableau(),
+        color = d3.scaleOrdinal().domain([0, 4]).range(['#0656f3', '#fd7f03', '#9e5bc7', '#fd030b']),
+        ctx = canvas.node().getContext("2d"),
+        xpos = d3.scaleOrdinal().range([0, width]),
+        ypos = d3.scaleOrdinal().range([0, height]),
+        linkColor = d3.scaleLinear().domain([0, 100]).range(['#fcfdfb', '#030000'])
+    simulation = d3.forceSimulation()
+        .force("x", d3.forceX(width / 4))
+        .force("y", d3.forceY(function (d) {
+            return height/2 + (d.graph * 20)
+        }))
+        .force("collide", d3.forceCollide(r + 1))
+        .force("charge", d3.forceManyBody()
+            .strength(function (d) {
+                return -(d.layer * 400);
+            }))
+        .force("link", d3.forceLink()
+            // .strength() // here is where you could add strength based on some object attribute
+            .id(function (d) {
+                return d.id;
+            }));
+
+    d3.json("NN_data.json", function (err, graph) {
+        if (err) throw err;
+
+        simulation
+            .nodes(graph.nodes)
+            .on("tick", update)
+
+            .force("link")
+            .links(graph.links);
+
+        canvas
+            .call(d3.drag()
+                .container(canvas.node())
+                .subject(dragsubject)
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+
+        function update() {
+            ctx.clearRect(0, 0, width, height);
+
+            // ctx.beginPath();
+            ctx.globalAlpha = 0.5;
+            // ctx.strokeStyle = "#aaa";
+            graph.links.forEach(drawLink);
+            // ctx.stroke();
+
+
+            ctx.globalAlpha = 1.0;
+            graph.nodes.forEach(drawNode);
+
+            // puts labels on nodes
+            graph.nodes.forEach(drawLabel);
+
+        }
+
+        function dragsubject() {
+            return simulation.find(d3.event.x, d3.event.y);
+        }
+
+        function mouseover() {
+            return simulation.find(d3.event.x, d3.event.y);
+        }
+
+    })
+
+    function drawLabel(d) {
+        ctx.font = "bold 14px Helvetica, Arial, sans-serif";
+        ctx.fillStyle = "#000000";
+        ctx.fillText(d.id, d.x, d.y);
+
+    }
+
+    function drawNode(d) {
+        ctx.beginPath();
+        ctx.fillStyle = color(d.layer);
+        ctx.moveTo(d.x, d.y);
+        ctx.arc(d.x, d.y, r, 0, 2 * Math.PI);
+        ctx.fill();
+
+
+    }
+
+    function drawLink(l) {
+        ctx.beginPath();
+        ctx.strokeStyle = linkColor(l.value)
+        ctx.moveTo(l.source.x, l.source.y);
+        ctx.lineTo(l.target.x, l.target.y);
+        ctx.stroke();
+    }
+
+    function dragstarted() {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d3.event.subject.fx = d3.event.subject.x;
+        d3.event.subject.fy = d3.event.subject.y;
+        console.log(d3.event.subject);
+    }
+
+    function dragged() {
+        d3.event.subject.fx = d3.event.x;
+        d3.event.subject.fy = d3.event.y;
+    }
+
+    function dragended() {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d3.event.subject.fx = null;
+        d3.event.subject.fy = null;
+    }
+
+
+</script>
+
+
+</body>
+</html>
